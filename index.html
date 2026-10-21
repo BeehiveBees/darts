@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Beehive Bees Darts</title>
+<title>Beehive Bees</title>
 <meta name="description" content="Beehive Bees: fixtures, results, league table, stats and awards for the 2026/27 Buntingford and District Darts League.">
 <meta name="theme-color" content="#0f0e0b">
 <meta name="apple-mobile-web-app-title" content="Beehive Bees">
@@ -232,7 +232,7 @@ footer{border-top:1px solid var(--line);padding-block:18px;color:var(--muted);fo
    DATA — update this block after each match
    ============================================================ */
 const US = "Beehive Bees";
-const LAST_UPDATED = "2026-10-14";
+const LAST_UPDATED = "2026-10-21";
 
 // Full 2026/27 league fixture list (home team first)
 const WEEKS = [
@@ -301,6 +301,11 @@ const MATCHES = [
           ["Pairs",["Bilson","Tank"],true],["Pairs",["Luke","Kay B"],true],["Pairs",["Chip","Jimmy"],true],
           ["Singles",["Chip"],true],["Singles",["Tank"],false],["Singles",["Bilson"],false],["Singles",["Jimmy"],false],["Singles",["Luke"],true],["Singles",["Kay B"],false]],
    s180:[], co:[], other:"High checkout for The Bell: Dean Debnam, 115."},
+  {d:"2026-10-20", comp:"League", opp:"Fox & Duck T", ha:"H", us:5, them:6,
+   games:[["Triples",["Bilson","Tank","Lenny"],true],["Triples",["Chip","Si","Kay B"],false],
+          ["Pairs",["Luke","Reece"],true],["Pairs",["Bilson","Tank"],false],["Pairs",["Chip","Jimmy"],true],
+          ["Singles",["Jimmy"],false],["Singles",["Tank"],true],["Singles",["Reece"],false],["Singles",["Luke"],false],["Singles",["Si"],false],["Singles",["Chip"],true]],
+   s180:["Luke"], co:[["Tank",100]], other:"New signing for the Bees: Lenny Debnam."},
 ];
 // Our 180s and checkouts: add to a match as s180:["Name"], co:[["Name",121]]
 
@@ -493,7 +498,7 @@ function renderAwards(){
   const live = k => k==="s180" ? (top180 ? `Current leader: ${esc(top180.name)} (${top180.s180})` : "Current leader: none recorded yet")
                  : k==="co" ? (topCo ? `Current leader: ${esc(topCo.name)} (${topCo.co})` : "Current leader: none recorded yet") : "";
   const icon = {"Captains' Player":"C","Players' Player":"P","Most 180s":"180","Highest Checkout":"C/O"};
-  let h = `<h2>Awards</h2><p class="lede">Presented at the end of each season.</p>`;
+  let h = `<h2>Awards</h2>`;
   AWARDS.forEach((s,i) => {
     h += `<h3>Season ${s.season}</h3><div class="awards">${s.items.map(a => `<div class="award">
       <div class="hex" style="font-size:${icon[a.t].length>2?".7rem":"1rem"}">${icon[a.t]}</div>
