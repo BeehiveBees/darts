@@ -232,7 +232,7 @@ footer{border-top:1px solid var(--line);padding-block:18px;color:var(--muted);fo
    DATA — update this block after each match
    ============================================================ */
 const US = "Beehive Bees";
-const LAST_UPDATED = "2026-10-21";
+const LAST_UPDATED = "2026-10-28";
 
 // Full 2026/27 league fixture list (home team first)
 const WEEKS = [
@@ -306,20 +306,25 @@ const MATCHES = [
           ["Pairs",["Luke","Reece"],true],["Pairs",["Bilson","Tank"],false],["Pairs",["Chip","Jimmy"],true],
           ["Singles",["Jimmy"],false],["Singles",["Tank"],true],["Singles",["Reece"],false],["Singles",["Luke"],false],["Singles",["Si"],false],["Singles",["Chip"],true]],
    s180:["Luke"], co:[["Tank",100]], other:"New signing for the Bees: Lenny Debnam."},
+  {d:"2026-10-27", comp:"League", opp:"Social Club", ha:"A", us:6, them:5,
+   games:[["Triples",["Reece","Luke","Lenny"],true],["Triples",["Si","Jimmy","Kay B"],true],
+          ["Pairs",["Chip","George"],true],["Pairs",["Bilson","Tank"],true],["Pairs",["Si","Jimmy"],false],
+          ["Singles",["Bilson"],false],["Singles",["Reece"],true],["Singles",["Chip"],false],["Singles",["Luke"],true],["Singles",["Tank"],false],["Singles",["Lenny"],false]],
+   s180:[], co:[], other:"No 180s or high checkouts recorded on the sheet."},
 ];
 // Our 180s and checkouts: add to a match as s180:["Name"], co:[["Name",121]]
 
 // Latest league table as supplied by the league administrators
 const TABLE = {
-  note:"After 3 games each, as supplied by the league. Our 7–4 win over The Bell on 13/10/2026 is not in this table yet.",
   rows:[
-    ["Fox & Duck B",3,3,0,17,6,6,29],["Beehive Bees",3,3,0,16,8,4,28],["Brown Bear",3,3,0,16,6,3,25],
-    ["Fox & Duck T",3,3,0,13,6,5,24],["Social Club",3,1,2,8,5,3,16],["Flight Club",3,1,2,5,6,2,13],
-    ["The Bell",3,1,2,5,5,1,11],["Fox & Duck A",3,0,3,5,3,3,11],["Black Bull",3,0,3,4,0,1,5],["Madhouse Masters",3,0,3,1,0,2,3]],
-  s180:[["R. Payne","Fox & Duck T",1],["Jess","Social Club",1],["B. Payne","Fox & Duck T",1],["A. Nash","Madhouse Masters",1]],
-  co:[[110,"2026-09-22","S. Prosser","Fox & Duck B"],[109,"2026-09-29","Sam","Brown Bear"],[106,"2026-09-22","T. Williamson","Fox & Duck B"],
-      [106,"2026-09-29","S. Wake","Fox & Duck B"],[99,"2026-09-15","N. Sharp","Fox & Duck T"],[92,"2026-09-29","Roger","Fox & Duck T"],
-      [88,"2026-09-29","Jess","Social Club"],[81,"2026-09-15","B. Payne","Fox & Duck T"],[80,"2026-09-29","C. Ivison","Black Bull"],[72,"2026-09-15","R. Sharp","Fox & Duck T"]]
+    ["Fox & Duck B",5,5,0,26,11,9,46],["Beehive Bees",5,4,1,20,13,7,40],["Fox & Duck T",5,5,0,20,10,7,37],
+    ["Social Club",5,3,2,18,9,7,34],["Brown Bear",5,3,2,22,7,5,34],["Flight Club",5,2,3,10,8,4,22],
+    ["The Bell",5,1,4,12,7,1,20],["Fox & Duck A",4,1,3,9,5,5,19],["Black Bull",5,0,5,5,2,1,8],["Madhouse Masters",4,0,4,2,0,2,4]],
+  s180:[["R. Payne","Fox & Duck T",1],["Jess","Social Club",1],["D. Beisser","Fox & Duck A",1],
+        ["B. Payne","Fox & Duck T",1],["A. Nash","Madhouse Masters",1],["L. Rannow","Beehive Bees",1]],
+  co:[[115,"2026-10-13","D. Debnam","The Bell"],[110,"2026-09-22","S. Prosser","Fox & Duck B"],[110,"2026-10-20","Jess","Social Club"],
+      [109,"2026-09-29","Sam","Brown Bear"],[106,"2026-09-22","T. Williamson","Fox & Duck B"],[106,"2026-09-29","S. Wake","Fox & Duck B"],
+      [100,"2026-10-20","Tank","Beehive Bees"],[100,"2026-10-20","N. Dare","Brown Bear"],[99,"2026-09-15","N. Sharp","Fox & Duck T"],[98,"2026-10-20","Gynn","Social Club"]]
 };
 
 // Awards. Set winner:"Name" when known.
@@ -462,7 +467,7 @@ function combos(f){
   }));
   return Object.values(C).sort((a,b) => b.p-a.p || b.w-a.w || a.names.join().localeCompare(b.names.join()));
 }
-let sortKey = "tw", sortDir = -1;
+let sortKey = "tp", sortDir = -1;
 function renderStats(){
   const {players, team} = computeStats();
   const val = (p,k) => k==="name" ? p.name : k==="tp" ? p.tp : k==="tw" ? p.tw : k==="pct" ? (p.tp ? p.tw/p.tp : -1) :
