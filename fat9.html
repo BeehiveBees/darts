@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en-GB" data-style="led">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fat 9, Double 8, Bull: one-off game</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Bungee&family=Bungee+Shade&display=swap" rel="stylesheet">
+<style>
+:root{
+  --surround:#151515; --b-black:#1d1d1d; --b-cream:#eee2c4; --b-red:#c2342a; --b-green:#1e7a4b; --b-num:#f4f1e6;
+  --page:#050d33; --bg:#0b1a5c; --panel:#11247a; --ink:#ffffff; --muted:#aebbe9; --line:#2f48a8;
+  --gold:#ffc82c; --gold-deep:#d69200; --red:#e1252f; --red-deep:#a3141c;
+  --accent:#ffc82c; --accent-ink:#0b1a5c; --hit:#ffc82c; --miss:#8592c4;
+  --f-show:Bungee,Impact,"Arial Black",sans-serif;
+  --f-title:"Bungee Shade",Bungee,Impact,"Arial Black",sans-serif;
+  --f-ui:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  color-scheme:dark;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark}}
+:root[data-theme="dark"]{color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px);background:var(--page)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);font:500 18px/1.35 var(--f-ui);-webkit-tap-highlight-color:transparent;min-height:100vh}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+/* the studio: spotlight from above, light rays, a row of bulbs */
+.wrap{max-width:580px;margin:0 auto;padding:18px 16px 40px;min-height:100vh;
+  background:
+    radial-gradient(ellipse 70% 40% at 50% 0%,rgba(255,236,170,.22),transparent 70%),
+    repeating-conic-gradient(from -90deg at 50% 0%,rgba(255,255,255,.055) 0deg 5deg,transparent 5deg 10deg),
+    linear-gradient(180deg,#10247a 0%,#0a1858 45%,#071143 100%);
+  box-shadow:inset 0 0 0 4px var(--gold),inset 0 0 0 7px var(--red);
+}
+@media (min-width:620px){.wrap{margin:16px auto;border-radius:18px;overflow:hidden}}
+
+header{display:flex;flex-direction:column;align-items:stretch;gap:12px;padding:8px 6px 14px}
+h1{margin:0;text-align:center}
+h1 .title{display:inline-block;white-space:nowrap;font:400 clamp(1.1rem,5.1vw,2.1rem)/1 var(--f-show);color:#fff;background:var(--red);border:2px solid var(--gold);border-radius:8px;padding:10px 12px 8px;box-shadow:0 4px 0 var(--red-deep)}
+h1 .sub{display:block;margin-top:14px;font:400 clamp(1rem,4.5vw,1.5rem)/1.05 var(--f-show);letter-spacing:.04em;color:var(--gold);text-shadow:0 3px 0 var(--red-deep),0 0 18px rgba(255,200,44,.35)}
+
+.side{display:flex;align-items:center;justify-content:center;gap:8px}
+.night{display:flex;flex-direction:row;align-items:center;gap:8px;font-size:.95rem;color:var(--muted)}
+.datebox{position:relative;display:inline-block;border:2px solid var(--gold);background:var(--bg);border-radius:8px;padding:3px 12px;font:600 1.05rem/1.3 var(--f-ui);color:var(--ink)}
+.datebox:focus-within{outline:3px solid var(--gold);outline-offset:2px}
+.datebox input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:0;margin:0;padding:0;color-scheme:dark}
+
+nav{display:flex;gap:6px;margin-bottom:14px}
+nav button{flex:1;border:2px solid var(--gold);background:linear-gradient(180deg,var(--red),var(--red-deep));color:#fff;padding:10px 4px 9px;border-radius:999px;font:400 .95rem/1 var(--f-show);box-shadow:0 3px 0 #3d070b}
+nav button[aria-selected="true"]{background:linear-gradient(180deg,#ffe07a,var(--gold));color:var(--accent-ink);box-shadow:0 3px 0 var(--gold-deep),0 0 16px rgba(255,200,44,.45)}
+
+.note{font-size:1rem;color:var(--muted);margin:0 0 12px}
+.note.warn{color:#ffb3b3}
+
+.players{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;margin:0 -2px;scrollbar-width:none}
+.players::-webkit-scrollbar{display:none}
+.chip{flex:none;border:2px solid var(--line);background:var(--panel);border-radius:999px;padding:5px 15px;font-size:1.1rem;font-weight:600;white-space:nowrap}
+.chip[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:var(--accent-ink)}
+.chip.add{border-style:dashed;color:var(--muted)}
+.chip.remove{border-color:var(--red);background:var(--red-deep);color:#fff}
+.addform{display:flex;gap:8px;margin:4px 0 10px}
+.addform input{flex:1;min-width:0;border:2px solid var(--line);background:var(--bg);border-radius:10px;padding:7px 10px}
+.btn{border:2px solid var(--gold);border-radius:12px;padding:8px 14px;background:var(--panel);color:#fff;font:400 .9rem/1.1 var(--f-show);box-shadow:0 3px 0 #040a28}
+.btn.ghost{border-color:var(--line)}
+.btn:disabled{opacity:.4;cursor:default}
+
+.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0 14px}
+.slot{border:3px solid var(--gold);background:linear-gradient(180deg,#1a3192,#0c1b62);border-radius:12px;padding:6px 4px;text-align:center;min-height:76px;display:flex;flex-direction:column;justify-content:center;box-shadow:0 4px 0 var(--gold-deep)}
+.slot small{display:block;font-size:.9rem;color:var(--muted);font-weight:600}
+.slot b{display:block;font:400 1.4rem/1.2 var(--f-show);color:#fff}
+.slot.current{border-color:#fff;box-shadow:0 4px 0 var(--gold-deep),0 0 18px rgba(255,200,44,.55)}
+.slot.hit{background:linear-gradient(180deg,#ffe07a,var(--gold))}
+.slot.hit small{color:var(--red-deep)}
+.slot.hit b{color:var(--accent-ink)}
+.slot.missed b{color:var(--miss);text-decoration:line-through}
+.slot.filled{cursor:pointer}
+
+.boardbox{position:relative;max-width:440px;margin:0 auto;padding:10px;border-radius:50%;background:radial-gradient(circle,rgba(255,220,120,.25),transparent 68%)}
+svg.board{display:block;width:100%;height:auto;touch-action:manipulation;user-select:none;filter:drop-shadow(0 8px 16px rgba(0,0,0,.55))}
+svg.board .seg{cursor:pointer;stroke:#8f9895;stroke-width:.6}
+svg.board .seg:hover{filter:brightness(1.3)}
+svg.board .target{fill:none;stroke:var(--gold);stroke-width:4;pointer-events:none;stroke-dasharray:6 4}
+svg.board .mark{pointer-events:none}
+.under{display:flex;gap:8px;margin-top:12px}
+.under .btn{flex:1;padding:12px}
+.btn.save{background:linear-gradient(180deg,var(--red),var(--red-deep));font-size:1.05rem;box-shadow:0 4px 0 #3d070b}
+.toast{min-height:1.5em;text-align:center;font:400 1.1rem/1.3 var(--f-show);margin-top:10px;color:var(--gold);text-shadow:0 2px 0 var(--red-deep)}
+.mine{text-align:center;font-size:1.05rem;color:var(--muted);margin-top:4px}
+
+h2{font:400 1.25rem/1.2 var(--f-show);color:var(--gold);margin:22px 0 8px;text-shadow:0 2px 0 var(--red-deep)}
+h2:first-child{margin-top:0}
+.tablebox{overflow-x:auto;border:3px solid var(--gold);border-radius:12px;background:var(--bg)}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:7px 10px;text-align:right;white-space:nowrap}
+th{font-size:.95rem;font-weight:700;color:var(--accent-ink);background:var(--gold)}
+th:first-child,td:first-child{text-align:left}
+td{font-size:1.15rem;font-weight:600}
+tr+tr td{border-top:1px solid var(--line)}
+td small{color:var(--muted);font-size:.8rem;margin-left:3px}
+td.star{color:var(--gold);font-weight:700}
+
+.log{list-style:none;margin:0;padding:0;border:3px solid var(--gold);border-radius:12px;background:var(--bg)}
+.log li{display:flex;align-items:center;gap:10px;padding:8px 10px}
+.log li+li{border-top:1px solid var(--line)}
+.log .who{flex:1;min-width:0;font-size:1.15rem;font-weight:600;overflow:hidden;text-overflow:ellipsis}
+.log .who small{display:block;color:var(--muted);font-size:.85rem;font-weight:500}
+.darts{display:flex;gap:4px}
+.d{font:700 .95rem/1 var(--f-ui);padding:5px 5px;border-radius:6px;border:2px solid var(--line);color:var(--miss);min-width:46px;text-align:center}
+.d.hit{border-color:var(--gold);background:var(--gold);color:var(--accent-ink)}
+.del{border:0;background:transparent;color:var(--muted);font-size:1.3rem;padding:2px 6px;line-height:1;white-space:nowrap}
+.del.confirm{color:#ff4d55;font-size:1.05rem;font-weight:700}
+.empty{padding:14px;text-align:center;color:var(--muted)}
+.nightrow{width:100%;display:flex;justify-content:space-between;border:0;background:transparent;padding:0;text-align:left;font-size:1.1rem}
+.selectrow{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.selectrow select{flex:1;border:2px solid var(--gold);background:var(--bg);border-radius:10px;padding:7px;font-size:1.05rem}
+@media (prefers-reduced-motion:no-preference){.slot,.chip,nav button{transition:background-color .15s,border-color .15s,box-shadow .15s}}
+</style>
+
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1><span class="title">Fat 9, Double 8, Bull</span><span class="sub">Yes, Yes, Ah!</span></h1>
+  </header>
+  <nav role="tablist">
+    <button role="tab" data-tab="throw" aria-selected="true">Throw</button>
+    <button role="tab" data-tab="tonight" aria-selected="false">Session</button>
+  </nav>
+  <main id="view"></main>
+</div>
+<script>
+(function(){
+const $=s=>document.querySelector(s);
+const ORDER=[20,1,18,4,13,6,10,15,2,17,3,19,7,16,8,11,14,9,12,5];
+const R={bull:12,outer:27,tIn:94,tOut:112,dIn:150,dOut:170,num:186};
+const TARGETS=[{n:9,r:'fat',label:'Fat 9'},{n:8,r:'double',label:'Double 8'},{n:0,r:'bull',label:'Bull'}];
+const isHit=(d,i)=>!!d&&(i===2?d.r==='bull':d.n===TARGETS[i].n&&d.r===TARGETS[i].r);
+function label(d){if(!d)return'';if(d.r==='miss')return'Miss';if(d.r==='bull')return'Bull';if(d.r==='outer')return'25';
+  if(d.r==='double')return'D'+d.n;if(d.r==='treble')return'T'+d.n;if(d.r==='fat')return'Fat '+d.n;return'Thin '+d.n}
+function esc(s){const e=document.createElement('span');e.textContent=s;return e.innerHTML}
+
+const state={players:[],attempts:[],player:null,darts:[],adding:true,editing:false,confirmHide:null,confirmDel:null,tab:'throw',toast:'',seq:0};
+
+function pt(r,a){const t=(a-90)*Math.PI/180;return[(r*Math.cos(t)).toFixed(2),(r*Math.sin(t)).toFixed(2)]}
+function sector(r1,r2,a1,a2){const[x1,y1]=pt(r2,a1),[x2,y2]=pt(r2,a2),[x3,y3]=pt(r1,a2),[x4,y4]=pt(r1,a1);
+  return`M${x1} ${y1}A${r2} ${r2} 0 0 1 ${x2} ${y2}L${x3} ${y3}A${r1} ${r1} 0 0 0 ${x4} ${y4}Z`}
+function boardSVG(){
+  const tgt=state.darts.length<3?TARGETS[state.darts.length]:null;
+  let s='<svg class="board" viewBox="-200 -200 400 400" role="img" aria-label="Dartboard. Tap where the dart landed.">';
+  s+='<circle r="199" fill="var(--surround)"/>';
+  ORDER.forEach((n,i)=>{
+    const a1=i*18-9,a2=i*18+9,dark=i%2===0;
+    const single=dark?'var(--b-black)':'var(--b-cream)',ring=dark?'var(--b-red)':'var(--b-green)';
+    [['double',R.dIn,R.dOut,ring],['fat',R.tOut,R.dIn,single],['treble',R.tIn,R.tOut,ring],['thin',R.outer,R.tIn,single]].forEach(([r,a,b,f])=>{
+      s+=`<path class="seg" d="${sector(a,b,a1,a2)}" fill="${f}" data-n="${n}" data-r="${r}"><title>${label({n,r})}</title></path>`});
+    const[x,y]=pt(R.num,i*18);
+    s+=`<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" fill="var(--b-num)" font-family="Barlow Condensed,sans-serif" font-weight="600" font-size="19" pointer-events="none">${n}</text>`;
+  });
+  s+=`<circle class="seg" r="${R.outer}" fill="var(--b-green)" data-n="25" data-r="outer"><title>25</title></circle>`;
+  s+=`<circle class="seg" r="${R.bull}" fill="var(--b-red)" data-n="50" data-r="bull"><title>Bull</title></circle>`;
+  if(tgt){
+    if(tgt.r==='bull')s+=`<circle class="target" r="${R.bull+3}"/>`;
+    else{const i=ORDER.indexOf(tgt.n),r=tgt.r==='fat'?[R.tOut,R.dIn]:[R.dIn,R.dOut];s+=`<path class="target" d="${sector(r[0],r[1],i*18-9,i*18+9)}"/>`}
+  }
+  state.darts.forEach((d,i)=>{if(d.x==null)return;
+    s+=`<g class="mark"><circle cx="${d.x}" cy="${d.y}" r="9" fill="var(--accent)" stroke="#111" stroke-width="1.5"/><text x="${d.x}" y="${d.y}" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="700" fill="#111" font-family="Barlow,sans-serif">${i+1}</text></g>`});
+  return s+'</svg>';
+}
+function pname(id){const p=state.players.find(x=>x.id===id);if(p)return p.name;const a=state.attempts.find(x=>x.player===id);return a?a.name:'Player'}
+function tally(list){
+  const by={};
+  list.forEach(a=>{const p=by[a.player]||(by[a.player]={player:a.player,throws:0,h:[0,0,0],all:0});
+    p.throws++;const hs=[0,1,2].map(i=>isHit(a.darts[i],i));hs.forEach((h,i)=>{if(h)p.h[i]++});if(hs.every(Boolean))p.all++});
+  return Object.values(by).sort((a,b)=>b.all-a.all||(b.h[0]+b.h[1]+b.h[2])-(a.h[0]+a.h[1]+a.h[2])||a.throws-b.throws);
+}
+function pct(a,b){return b?Math.round(a/b*100)+'%':''}
+function tonightView(){
+  const rows=tally(state.attempts);
+  let s='<h2>Leaderboard</h2>';
+  if(!rows.length)s+='<div class="tablebox"><div class="empty">No throws yet.</div></div>';
+  else{s+='<div class="tablebox"><table><thead><tr><th>Player</th><th>Throws</th><th>Fat 9</th><th>D8</th><th>Bull</th><th>Jackpot</th></tr></thead><tbody>';
+    rows.forEach(r=>{s+=`<tr><td>${esc(pname(r.player))}</td><td>${r.throws}</td>`+r.h.map(h=>`<td>${h}<small>${pct(h,r.throws)}</small></td>`).join('')+`<td class="${r.all?'star':''}">${r.all}</td></tr>`});
+    s+='</tbody></table></div>'}
+  s+='<h2>Throws</h2>';
+  if(!state.attempts.length)return s+'<ul class="log"><li class="empty">Nothing yet.</li></ul>';
+  return s+'<ul class="log">'+state.attempts.slice().reverse().map(a=>{
+    const time=new Date(a.at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    return`<li><span class="who">${esc(pname(a.player))}<small>${time}</small></span><span class="darts">${
+      [0,1,2].map(i=>`<span class="d ${isHit(a.darts[i],i)?'hit':''}">${esc(label(a.darts[i]))}</span>`).join('')}</span><button class="del${state.confirmDel===a.id?' confirm':''}" data-del="${a.id}" aria-label="Delete this throw">${state.confirmDel===a.id?'Delete?':'\u00d7'}</button></li>`}).join('')+'</ul>';
+}
+
+function view(){
+  const vis=state.players;
+  let s='<div class="players">';
+  vis.forEach(p=>{s+=state.editing
+    ?`<button class="chip remove" data-hide="${p.id}" aria-label="Remove ${esc(p.name)}">${state.confirmHide===p.id?'Remove '+esc(p.name)+'?':esc(p.name)+' \u00d7'}</button>`
+    :`<button class="chip" data-player="${p.id}" aria-pressed="${p.id===state.player}">${esc(p.name)}</button>`});
+  if(!state.editing)s+=`<button class="chip add" data-act="add">+ Add Player</button>`;
+  if(vis.length)s+=`<button class="chip add" data-act="edit">${state.editing?'Done':'\u2212 Remove Player'}</button>`;
+  s+='</div>';
+  if(state.editing)s+=`<p class="note">Tap a player, then tap again to confirm.</p>`;
+  if(!state.editing&&(state.adding||!vis.length))s+=`<div class="addform"><input id="newname" maxlength="30" placeholder="Player\u2019s name" autocomplete="off"><button class="btn" data-act="saveplayer">Add</button></div>`;
+  s+='<div class="slots">';
+  TARGETS.forEach((t,i)=>{const d=state.darts[i];const cls=['slot',i===state.darts.length?'current':'',d?'filled':'',d?(isHit(d,i)?'hit':'missed'):''].join(' ');
+    s+=`<div class="${cls}" ${d?`data-slot="${i}" role="button" tabindex="0" aria-label="Dart ${i+1}: ${label(d)}. Tap to clear."`:''}><small>Dart ${i+1}: ${t.label}</small><b>${d?esc(label(d)):'\u2013'}</b></div>`});
+  s+='</div><div class="boardbox">'+boardSVG()+'</div>';
+  const full=state.darts.length===3;
+  s+=`<div class="under"><button class="btn ghost" data-act="miss" ${full?'disabled':''}>Missed the board</button><button class="btn save" data-act="save" ${full&&state.player?'':'disabled'}>Save throw</button></div>`;
+  s+=`<div class="toast" aria-live="polite">${esc(state.toast)}</div>`;
+  return s;
+}
+function render(){
+  document.querySelectorAll('nav button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===state.tab));
+  $('#view').innerHTML=state.tab==='tonight'?tonightView():view();const n=$('#newname');if(n&&state.adding&&state.players.length)n.focus()}
+
+function addDart(d){if(state.darts.length>=3)return;state.darts.push(d);state.toast='';render()}
+function saveThrow(){
+  if(state.darts.length<3||!state.player)return;
+  const a={id:'a'+(++state.seq),player:state.player,name:pname(state.player),darts:state.darts.slice(),at:Date.now()};state.attempts.push(a);
+  const who=pname(state.player);const hits=[0,1,2].filter(i=>isHit(a.darts[i],i)).length;
+  state.darts=[];
+  state.toast=hits===3?`${who} hit the jackpot!`:`${who}: ${hits} of 3`;
+  const vp=state.players;const i=vp.findIndex(p=>p.id===state.player);
+  if(vp.length>1)state.player=vp[(i+1)%vp.length].id;
+  render();
+}
+function savePlayer(){
+  const v=($('#newname')||{}).value;const name=(v||'').trim();if(!name)return;
+  const p={id:'p'+(++state.seq),name};state.players.push(p);
+  if(!state.player)state.player=p.id;
+  state.adding=false;render();
+}
+document.addEventListener('click',e=>{
+  const t=e.target;
+  const tab=t.closest('nav button');if(tab){state.tab=tab.dataset.tab;state.toast='';state.confirmDel=null;render();return}
+  const del=t.closest('[data-del]');if(del){const id=del.dataset.del;if(state.confirmDel!==id){state.confirmDel=id;render();return}state.confirmDel=null;state.attempts=state.attempts.filter(x=>x.id!==id);render();return}
+  if(state.confirmDel){state.confirmDel=null;render()}
+  const seg=t.closest('.seg');
+  if(seg){if(state.darts.length>=3)return;const svg=seg.ownerSVGElement;const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;
+    const q=p.matrixTransform(svg.getScreenCTM().inverse());addDart({n:+seg.dataset.n,r:seg.dataset.r,x:Math.round(q.x),y:Math.round(q.y)});return}
+  const hd=t.closest('[data-hide]');if(hd){const id=hd.dataset.hide;
+    if(state.confirmHide!==id){state.confirmHide=id;render();return}
+    state.confirmHide=null;state.players=state.players.filter(p=>p.id!==id);
+    if(state.player===id)state.player=state.players.length?state.players[0].id:null;
+    if(!state.players.length)state.editing=false;render();return}
+  const pl=t.closest('[data-player]');if(pl){state.player=pl.dataset.player;render();return}
+  const sl=t.closest('[data-slot]');if(sl){state.darts=state.darts.slice(0,+sl.dataset.slot);render();return}
+  const act=t.closest('[data-act]');if(!act)return;
+  const a=act.dataset.act;
+  if(a==='add'){state.adding=!state.adding;render()}
+  else if(a==='edit'){state.editing=!state.editing;state.adding=false;state.confirmHide=null;render()}
+  else if(a==='saveplayer')savePlayer();
+  else if(a==='miss')addDart({n:0,r:'miss'});
+  else if(a==='save')saveThrow();
+});
+document.addEventListener('keydown',e=>{
+  if(e.target.id==='newname'&&e.key==='Enter')savePlayer();
+  if((e.key==='Enter'||e.key===' ')&&e.target.dataset&&e.target.dataset.slot!=null){e.preventDefault();state.darts=state.darts.slice(0,+e.target.dataset.slot);render()}
+});
+render();
+})();
+</script>
+</body>
+</html>
