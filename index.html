@@ -250,7 +250,7 @@ footer{border-top:1px solid var(--line);padding-block:18px;color:var(--muted);fo
    DATA — update this block after each match
    ============================================================ */
 const US = "Beehive Bees";
-const LAST_UPDATED = "2026-11-10";
+const LAST_UPDATED = "2026-11-18";
 
 // Full 2026/27 league fixture list (home team first)
 const WEEKS = [
@@ -334,20 +334,27 @@ const MATCHES = [
           ["Pairs",["Jimmy","Si"],true],["Pairs",["Chip","George"],true],["Pairs",["Bilson","Tank"],true],
           ["Singles",["Luke"],false],["Singles",["Reece"],true],["Singles",["Tank"],true],["Singles",["Chip"],true],["Singles",["George"],true],["Singles",["Lenny"],true]],
    s180:["Chip"], co:[], other:"No high checkouts recorded on the sheet."},
+  {d:"2026-11-17", comp:"League", opp:"Brown Bear", ha:"H", us:2, them:9,
+   games:[["Triples",["Tank","Jimmy","Kay B"],false],["Triples",["Reece","Luke","Lenny"],false],
+          ["Pairs",["Chip","George"],false],["Pairs",["Bilson","Tank"],true],["Pairs",["Jimmy","Luke"],false],
+          ["Singles",["Bilson"],false],["Singles",["Lenny"],false],["Singles",["George"],false],["Singles",["Chip"],false],["Singles",["Reece"],true],["Singles",["Tank"],false]],
+   s180:[], co:[], other:"No 180s or high checkouts recorded on the sheet."},
 ];
 // Our 180s and checkouts: add to a match as s180:["Name"], co:[["Name",121]]
 
 // Latest league table as supplied by the league administrators
 const TABLE = {
   rows:[
-    ["Fox & Duck B",5,5,0,26,11,9,46],["Beehive Bees",5,4,1,20,13,7,40],["Fox & Duck T",5,5,0,20,10,7,37],
-    ["Social Club",5,3,2,18,9,7,34],["Brown Bear",5,3,2,22,7,5,34],["Flight Club",5,2,3,10,8,4,22],
-    ["The Bell",5,1,4,12,7,1,20],["Fox & Duck A",4,1,3,9,5,5,19],["Black Bull",5,0,5,5,2,1,8],["Madhouse Masters",4,0,4,2,0,2,4]],
-  s180:[["R. Payne","Fox & Duck T",1],["Jess","Social Club",1],["D. Beisser","Fox & Duck A",1],
-        ["B. Payne","Fox & Duck T",1],["A. Nash","Madhouse Masters",1],["L. Rannow","Beehive Bees",1]],
+    ["Fox & Duck B",7,7,0,32,15,12,59],["Beehive Bees",7,6,1,27,18,11,56],["Brown Bear",7,5,2,34,12,7,53],
+    ["Fox & Duck T",7,6,1,30,14,7,51],["Social Club",7,3,4,25,11,8,44],["The Bell",7,2,5,18,10,4,32],
+    ["Flight Club",7,2,5,14,9,4,27],["Fox & Duck A",6,2,4,11,8,8,27],["Black Bull",7,1,6,9,4,2,15],["Madhouse Masters",6,0,6,4,1,5,10]],
+  s180:[["R. Payne","Fox & Duck T",3],["Stu","Fox & Duck B",2],["Jess","Social Club",1],["A. Nash","Madhouse Masters",1],
+        ["D. Beisser","Fox & Duck A",1],["L. Rannow","Beehive Bees",1],["Sam","Brown Bear",1],["Graham","Fox & Duck A",1],
+        ["A. Bremner","Black Bull",1],["Chip","Beehive Bees",1],["B. Payne","Fox & Duck T",1],["Spud","Brown Bear",1],
+        ["Nick","Fox & Duck T",1],["Jack","Brown Bear",1]],
   co:[[115,"2026-10-13","D. Debnam","The Bell"],[110,"2026-09-22","S. Prosser","Fox & Duck B"],[110,"2026-10-20","Jess","Social Club"],
       [109,"2026-09-29","Sam","Brown Bear"],[106,"2026-09-22","T. Williamson","Fox & Duck B"],[106,"2026-09-29","S. Wake","Fox & Duck B"],
-      [100,"2026-10-20","Tank","Beehive Bees"],[100,"2026-10-20","N. Dare","Brown Bear"],[99,"2026-09-15","N. Sharp","Fox & Duck T"],[98,"2026-10-20","Gynn","Social Club"]]
+      [106,"2026-11-10","Harvey","Brown Bear"],[100,"2026-10-20","Tank","Beehive Bees"],[100,"2026-10-20","N. Dare","Brown Bear"],[100,"2026-10-27","Bob","Fox & Duck A"]]
 };
 
 // Awards. Set winner:"Name" when known.
@@ -523,7 +530,8 @@ function renderAwards(){
   const {players} = computeStats();
   const top180 = players.filter(p=>p.s180).sort((a,b)=>b.s180-a.s180)[0];
   const topCo = players.filter(p=>p.co).sort((a,b)=>b.co-a.co)[0];
-  const live = k => k==="s180" ? (top180 ? `Current leader: ${esc(top180.name)} (${top180.s180})` : "Current leader: none recorded yet")
+  const lead180 = top180 ? players.filter(p=>p.s180===top180.s180).map(p=>p.name).sort() : [];
+  const live = k => k==="s180" ? (lead180.length ? `${lead180.length>1?"Joint leaders":"Current leader"}: ${lead180.map(esc).join(" and ")} (${top180.s180} each)`.replace(/ each\)$/, lead180.length>1?" each)":")") : "Current leader: none recorded yet")
                  : k==="co" ? (topCo ? `Current leader: ${esc(topCo.name)} (${topCo.co})` : "Current leader: none recorded yet") : "";
   const icon = {"Captains' Player":"C","Players' Player":"P","Most 180s":"180","Highest Checkout":"C/O"};
   let h = `<h2>Awards</h2>`;
@@ -602,9 +610,13 @@ window.addEventListener("resize", fitTT);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitTT);
 
 /* Tabs with #hash deep links */
-const TABS = ["teletext","fixtures","results","table","stats","awards"];
+// Beefax only appears after a win
+const LATEST = MATCHES.slice().sort((a,b)=>a.d.localeCompare(b.d)).at(-1);
+const BEEFAX_ON = LATEST && LATEST.us > LATEST.them;
+if (!BEEFAX_ON) { $("#t-teletext").remove(); $("#p-teletext").remove(); }
+const TABS = (BEEFAX_ON ? ["teletext"] : []).concat(["fixtures","results","table","stats","awards"]);
 function show(t){
-  if (!TABS.includes(t)) t = "teletext";
+  if (!TABS.includes(t)) t = TABS[0];
   TABS.forEach(x => { $("#p-"+x).hidden = x!==t; $("#t-"+x).setAttribute("aria-selected", x===t); });
   if (t==="teletext") requestAnimationFrame(fitTT);
   try { if (location.hash !== "#"+t) history.replaceState(null, "", "#"+t); } catch(e){}
@@ -612,7 +624,7 @@ function show(t){
 document.querySelectorAll(".tab").forEach(b => b.onclick = () => { show(b.dataset.tab); window.scrollTo({top:0}); });
 window.addEventListener("hashchange", () => show(location.hash.slice(1)));
 
-renderFixtures(); renderResults(); renderTable(); renderStats(); renderAwards(); renderTeletext();
+renderFixtures(); renderResults(); renderTable(); renderStats(); renderAwards(); if (BEEFAX_ON) renderTeletext();
 $("#foot").textContent = `Last updated ${fmt(LAST_UPDATED)}`;
 show(location.hash.slice(1));
 </script>
